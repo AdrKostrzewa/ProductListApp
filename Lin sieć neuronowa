@@ -1,0 +1,91 @@
+import math
+import random
+
+class LinearNeutralNetwork:
+    def __init__(self, train_input, train_output):
+        # self.weights = [-0.1, 0.2, -0.5, 0.3, -0.4]
+        self.weights = []
+        
+        self.eta_learning_rate = 0.1
+        self.train_input = train_input
+        self.train_output = train_output
+        self.normalized_input = []
+        self.epochs = 0
+        
+        self.normalize_input()
+        self.generate_weights()
+
+
+    def normalize_input(self):
+        for row in self.train_input:
+            distance_sum = math.sqrt(sum([math.pow(value, 2) for value in row]))            
+            normalized_row = [round(value/distance_sum, 3) for value in row]
+            self.normalized_input.append(normalized_row)
+        
+        
+    def generate_weights(self):
+        for _ in range(3):
+            row = [round((random.random() * 1000) % 2 - 1, 2) for __ in range(5)]
+            self.weights.append(row)
+
+
+    def train(self):
+        stop_key = "a"
+        while stop_key != "k":
+            index = (self.epochs) % len(self.train_output[0])
+
+            self.epochs += 1
+            print("\n\tEpoka ", self.epochs)
+            
+            for neuron_idx in range(3):
+                neuron_y = sum([self.normalized_input[index][i] * self.weights[neuron_idx][i] for i in range(len(self.normalized_input[index]))])
+                print(f"Wynik dla {neuron_idx+1} neuronu dla {index} wzorca {round(neuron_y, 3)}")
+
+                error = (self.train_output[neuron_idx][index]) - neuron_y
+                print(f"Poprawny wynik: {(self.train_output[neuron_idx][index])} zatem error wynosi {round(error,3)}")
+                
+                weights_after_learning = [round(self.weights[neuron_idx][i] + (self.eta_learning_rate * error * self.normalized_input[index][i]), 4) for i in range(len(self.normalized_input[index]))]
+                
+                # Commented code below was used for checking if learning changes anything for better. I didn't delete this for future use I hope. 
+                
+                # print("\nWagi po nauczeniu\n", weights_after_learning)
+                # neuron_y2 = sum([self.normalized_input[index][i] * weights_after_learning[i] for i in range(len(self.normalized_input[index]))])
+                # print(f"Wynik dla {neuron_idx+1} neuronu dla {index} wzorca {round(neuron_y2, 4)}")
+                # error = (self.train_output[neuron_idx][index]) - neuron_y2 
+                # print(f"Poprawny wynik: {(self.train_output[neuron_idx][index])} zatem error po wprowadzeniu korekty wynosi {round(error, 3)}")
+            
+                self.weights[neuron_idx] = [round(weights_after_learning[i] + (self.eta_learning_rate * error * self.normalized_input[index][i]), 6) for i in range(len(weights_after_learning))]
+                
+            stop_key = input("\nJeÅ›li chcesz przerwaÄ‡ naukÄ™ naciÅ›nij 'k', a jeÅ›li kontynuowaÄ‡ uczenie inny klawisz i zatwierdÅº enterem.")
+                
+                
+# Uczenie liniowej sieci o 3 neuronach, kaÅ¼dy ma 5 wejÅ›Ä‡
+# WspÃ³Å‚czynnik uczenia 0.1
+# PrzykÅ‚adowe 4 wzorce wraz z oczekiwanÄ… odpowiedziÄ…
+# 3       4       3       4       5        dla 1 jest 1 dla 2 jest -1 dla 3 jest 0.8
+# 1       -2      1       -2      -4       dla 1 jest -1 dla 2 jest 0.8 dla 3 jest -0.8
+# 4       2       5       3       2        dla 1 jest 0.8 dla 2 jest -0.8 dla 3 jest 1
+# 0       -1      0       -3      -3       dla 1 jest -0.8 dla 2 jest 1 dla 3 jest -1
+
+# Unormowane  wzorce
+# 0.346   0.462   0.346   0.462   0.577
+# 0.196   -0.392  0.196   -0.392  -0.784
+# 0.525   0.263   0.657   0.394   0.263
+# 0       -0.229  0       -0.688  -0.688
+
+
+inputs = [
+    [3.0, 4.0, 3.0, 4.0, 5.0], 
+    [1.0, -2.0, 1.0, -2.0, -4.0], 
+    [4.0, 2.0, 5.0, 3.0, 2.0], 
+    [0.0, -1.0, 0.0, -3.0, -3.0]
+]
+
+outputs = [
+    [1, -1, 0.8, -0.8], 
+    [-1, 0.8, -0.8, 1], 
+    [0.8, -0.8, 1, -1]
+]
+
+network = LinearNeutralNetwork(inputs, outputs)
+network.train()
